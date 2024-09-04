@@ -3,33 +3,29 @@ package ru.akvine.qraft.rest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.akvine.qraft.core.QrCodeGenerator;
-
-import java.util.List;
+import ru.akvine.qraft.rest.converters.QrCodeConverter;
+import ru.akvine.qraft.rest.dto.qrcode.GenerateQrCodeRequest;
+import ru.akvine.qraft.rest.validators.QrCodeValidator;
+import ru.akvine.qraft.services.QrCodeService;
+import ru.akvine.qraft.services.dto.GenerateQrCode;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/qr-code/")
 public class QrCodeController {
+    private final QrCodeValidator qrCodeValidator;
+    private final QrCodeConverter qrCodeConverter;
+    private final QrCodeService qrCodeService;
 
-    @GetMapping(value = "/generate")
-    public ResponseEntity<String> generate(@Valid @RequestBody GenerateQrCodeRequest request) {
-        QrCodeGenerator qrCodeGenerator = QrCodeGenerator.builder()
-                .cornerBlocksAsCircles(request.isCornerBlocksAsCircles())
-                .roundInnerCorners(request.isRoundInnerCorners())
-                .roundOuterCorners(request.isRoundOuterCorners())
-                .cornerBlockRadiusFactor(request.getCornerBlockRadiusFactor())
-                .radiusFactor(request.getRadiusFactor())
-                .qrSize(request.getQrSize())
-                .errorCorrectionLevel(request.getErrorCorrectionLevel())
-                .build();
-        List<String> paths = qrCodeGenerator.generate(request.getUrl());
-        StringBuilder sb = new StringBuilder();
-        paths.forEach(sb::append);
-        return ResponseEntity.ok(sb.toString());
+    @PostMapping(value = "/generate")
+    public ResponseEntity<?> generate(@Valid @RequestBody GenerateQrCodeRequest request) {
+        qrCodeValidator.verifyGenerateQrCodeRequest(request);
+        GenerateQrCode generateQrCode = qrCodeConverter.convertToGenerateQrCode(request);
+        byte[] qrCode = qrCodeService.generateQrCode(generateQrCode);
+        return qrCodeConverter.convertToGenerateQrCodeResponse(generateQrCode.getImageType(), qrCode);
     }
 }

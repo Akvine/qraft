@@ -1,9 +1,8 @@
-package ru.akvine.qraft.rest;
+package ru.akvine.qraft.rest.dto.qrcode;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -16,19 +15,19 @@ public class GenerateQrCodeRequest {
     @NotBlank
     private String errorCorrectionLevel;
 
-    @NotNull
     @Min(0)
     @Max(3)
-    private Double cornerBlockRadiusFactor;
+    private double cornerBlockRadiusFactor;
 
-    @NotNull
     @Min(0)
     @Max(1)
-    private Integer radiusFactor;
+    private int radiusFactor;
 
-    @NotNull
     @Min(0)
-    private Integer qrSize;
+    private int qrSize;
+
+    @Min(0)
+    private int borderSize;
 
     private boolean roundInnerCorners;
 
@@ -36,4 +35,5 @@ public class GenerateQrCodeRequest {
 
     private boolean cornerBlocksAsCircles;
 
+    private String imageType;
 }
